@@ -1,0 +1,40 @@
+﻿@model FastFoodShop1.Models.Product
+@{
+    var cats = (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Categories;
+    bool isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "Thêm món" : "Sửa món";
+}
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<form method="post" enctype="multipart/form-data" asp-action="@(isNew ? "Create" : "Edit")" style="max-width:600px">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">Tên món</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mô tả</label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Giá (đ)</label>
+        <input asp-for="Price" type="number" step="1000" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Danh mục</label>
+        <select asp-for="CategoryId" asp-items="cats" class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ảnh món (jpg, png, webp, tối đa 5MB)</label>
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <div class="mb-2"><img src="@Model.ImageUrl" style="height:120px" class="rounded" /></div>
+        }
+        <input type="file" name="image" accept="image/*" class="form-control" />
+    </div>
+    <button class="btn btn-danger">Lưu</button>
+    <a class="btn btn-secondary" asp-action="Index">Hủy</a>
+</form>

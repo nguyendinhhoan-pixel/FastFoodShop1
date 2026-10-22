@@ -1,0 +1,246 @@
+﻿@model List<FastFoodShop1.Models.Product>
+@{
+    ViewData["Title"] = "Trang chủ";
+    var categories = (List<FastFoodShop1.Models.Category>)ViewBag.Categories;
+    var latest = (List<FastFoodShop1.Models.Product>)ViewBag.Latest;
+    var sale = (List<FastFoodShop1.Models.Product>)ViewBag.Sale;
+    var combo = (List<FastFoodShop1.Models.Product>)ViewBag.Combo;
+    string Icon(string name) => name switch
+    {
+        "Burger" => "🍔",
+        "Gà rán" => "🍗",
+        "Khoai tây" => "🍟",
+        "Đồ uống" => "🥤",
+        "Mì" => "🍜",
+        "Cơm" => "🍚",
+        "Tráng miệng" => "🍰",
+        "Combo" => "🍱",
+        _ => "🍽️"
+    };
+}
+
+<div class="row g-3">
+    <div class="col-lg-3">
+        <div class="cat-list">
+            @foreach (var c in categories)
+            {
+                <a asp-controller="Menu" asp-action="Index" asp-route-categoryId="@c.Id">@c.Name</a>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div id="hero" class="carousel slide rounded overflow-hidden" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="hero-slide" style="background:linear-gradient(135deg,#d62828,#f77f00)">
+                        <div>
+                            <h1 class="display-5 fw-bold">Đói? Có ngay!</h1>
+                            <p class="lead">Burger, gà rán nóng giòn, giao trong 30 phút</p>
+                            <a class="btn btn-light fw-bold" asp-controller="Menu" asp-action="Index">Đặt món ngay</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="hero-slide" style="background:linear-gradient(135deg,#2a9d8f,#264653)">
+                        <div>
+                            <h1 class="display-5 fw-bold">Combo gà rán tiết kiệm</h1>
+                            <p class="lead">Ưu đãi dành cho sinh viên mỗi ngày</p>
+                            <a class="btn btn-light fw-bold" asp-controller="Menu" asp-action="Index">Xem ưu đãi</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#hero" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#hero" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-9">
+
+        @if (sale.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center section-title">
+                <span>🔥 Đang sale hôm nay</span>
+                <span class="badge bg-danger fs-6" id="countdown">--:--:--</span>
+            </div>
+            <div class="row g-3 mb-4">
+                @foreach (var p in sale)
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="product-card">
+                            <span class="sale-badge">-@p.DiscountPercent%</span>
+                            <div class="thumb">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" alt="@p.Name" />
+                                }
+                                else
+                                {
+                                    @Icon(p.Category?.Name ?? "")
+                                }
+                            </div>
+                            <div class="p-3">
+                                <div class="name">@p.Name</div>
+                                <div class="price">@p.SalePrice!.Value.ToString("N0") đ</div>
+                                <div class="text-muted text-decoration-line-through small mb-2">@p.Price.ToString("N0") đ</div>
+                                <form method="post" asp-controller="Cart" asp-action="Add"><input type="hidden" name="id" value="@p.Id" /><button class="btn btn-brand btn-sm w-100">Thêm vào giỏ</button></form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (latest.Any())
+        {
+            <h3 class="section-title">✨ Món mới ra</h3>
+            <div class="row g-3 mb-4">
+                @foreach (var p in latest.Take(4))
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="product-card">
+                            <span class="new-badge">MỚI</span>
+                            <div class="thumb">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" alt="@p.Name" />
+                                }
+                                else
+                                {
+                                    @Icon(p.Category?.Name ?? "")
+                                }
+                            </div>
+                            <div class="p-3">
+                                <div class="name">@p.Name</div>
+                                @if (p.IsOnSale)
+                                {
+                                    <div class="price">@p.SalePrice!.Value.ToString("N0") đ</div>
+                                    <div class="text-muted text-decoration-line-through small mb-2">@p.Price.ToString("N0") đ</div>
+                                }
+                                else
+                                {
+                                    <div class="price mb-2">@p.Price.ToString("N0") đ</div>
+                                }
+                                <form method="post" asp-controller="Cart" asp-action="Add"><input type="hidden" name="id" value="@p.Id" /><button class="btn btn-brand btn-sm w-100">Thêm vào giỏ</button></form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        @if (combo.Any())
+        {
+            <h3 class="section-title">💰 Combo giá rẻ</h3>
+            <div class="row g-3 mb-4">
+                @foreach (var p in combo)
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="product-card">
+                            <div class="thumb">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" alt="@p.Name" />
+                                }
+                                else
+                                {
+                                    @Icon(p.Category?.Name ?? "")
+                                }
+                            </div>
+                            <div class="p-3">
+                                <div class="name">@p.Name</div>
+                                <div class="price mb-2">@p.Price.ToString("N0") đ</div>
+                                <form method="post" asp-controller="Cart" asp-action="Add"><input type="hidden" name="id" value="@p.Id" /><button class="btn btn-brand btn-sm w-100">Thêm vào giỏ</button></form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        <h3 class="section-title">Món nổi bật</h3>
+        <div class="row g-3">
+            @foreach (var p in Model)
+            {
+                <div class="col-6 col-md-3">
+                    <div class="product-card">
+                        @if (p.IsOnSale)
+                        {
+                            <span class="sale-badge">-@p.DiscountPercent%</span>
+                        }
+                        <div class="thumb">
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl" alt="@p.Name" />
+                            }
+                            else
+                            {
+                                @Icon(p.Category?.Name ?? "")
+                            }
+                        </div>
+                        <div class="p-3">
+                            <div class="name">@p.Name</div>
+                            @if (p.IsOnSale)
+                            {
+                                <div class="price">@p.SalePrice!.Value.ToString("N0") đ</div>
+                                <div class="text-muted text-decoration-line-through small mb-2">@p.Price.ToString("N0") đ</div>
+                            }
+                            else
+                            {
+                                <div class="price mb-2">@p.Price.ToString("N0") đ</div>
+                            }
+                            <form method="post" asp-controller="Cart" asp-action="Add"><input type="hidden" name="id" value="@p.Id" /><button class="btn btn-brand btn-sm w-100">Thêm vào giỏ</button></form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a class="btn btn-outline-secondary" asp-controller="Menu" asp-action="Index">Xem tất cả món</a>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <h3 class="section-title">&nbsp;</h3>
+        <div class="side-box">
+            <div class="side-title">Món mới nhất</div>
+            @foreach (var p in latest.Take(4))
+            {
+                <a class="side-item" asp-controller="Menu" asp-action="Index" asp-route-search="@p.Name">
+                    <div class="mini">
+                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                        {
+                            <img src="@p.ImageUrl" alt="@p.Name" />
+                        }
+                        else
+                        {
+                            @Icon(p.Category?.Name ?? "")
+                        }
+                    </div>
+                    <div>
+                        <div class="fw-semibold">@p.Name</div>
+                        <div class="price" style="font-size:15px">@p.Price.ToString("N0") đ</div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    var saleEnd = @(ViewBag.SaleEnd != null
+                ? "new Date('" + ((DateTime)ViewBag.SaleEnd).ToString("yyyy-MM-ddTHH:mm:ss") + "')"
+                : "null");
+
+    function tick() {
+        var el = document.getElementById("countdown");
+        if (!el) return;
+        var now = new Date(), end = saleEnd;
+        if (!end) { end = new Date(); end.setHours(23, 59, 59, 999); }
+        var s = Math.max(0, Math.floor((end - now) / 1000));
+        var p = n => String(n).padStart(2, "0");
+        el.textContent = "Còn " + p(Math.floor(s / 3600)) + ":" + p(Math.floor(s % 3600 / 60)) + ":" + p(s % 60);
+    }
+    tick(); setInterval(tick, 1000);
+</script>

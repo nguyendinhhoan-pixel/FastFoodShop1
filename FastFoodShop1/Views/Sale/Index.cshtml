@@ -1,0 +1,43 @@
+﻿@model List<FastFoodShop1.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sale";
+}
+
+<h3 class="section-title">Quản lý sale</h3>
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+
+<table class="table align-middle">
+    <thead>
+        <tr><th>Món</th><th>Giá gốc</th><th>% giảm</th><th>Kết thúc sale</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            var percent = (p.SalePrice != null && p.Price > 0)
+                ? (int)Math.Round((1 - (decimal)p.SalePrice.Value / (decimal)p.Price) * 100) : 0;
+            <tr>
+                <td colspan="5" class="p-0">
+                    <form method="post" asp-action="Save" class="d-flex align-items-center gap-3 p-2">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <div style="flex:3">@p.Name <small class="text-muted">(@p.Category?.Name)</small></div>
+                        <div style="flex:1">@p.Price.ToString("N0") đ</div>
+                        <div style="flex:1">
+                            <select name="discountPercent" class="form-select">
+                                @foreach (var v in new[] { 0, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70 }.Union(new[] { percent }).OrderBy(x => x))
+                                {
+                                    <option value="@v" selected="@(v == percent)">@(v == 0 ? "Không sale" : v + "%")</option>
+                                }
+                            </select>
+                        </div>
+                        <div style="flex:2"><input type="datetime-local" name="saleEnd" value="@(p.SaleEnd?.ToString("yyyy-MM-ddTHH:mm"))" class="form-control" /></div>
+                        <div><button class="btn btn-brand btn-sm">Lưu</button></div>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<p class="text-muted small">Để % giảm = 0 để tắt sale cho món đó.</p>
